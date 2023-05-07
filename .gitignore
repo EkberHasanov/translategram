@@ -1,0 +1,38 @@
+# Python files
+*.pyc
+__pycache__/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+*.venv
+env.bak/
+.env/
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+*.csv
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+
+# Miscellaneous
+.DS_Store
+.idea/
+.vscode/
+*.bak
+*.swp
+
+# Cache stuff
+.mypy_cache
+.pytest_cache

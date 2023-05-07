@@ -1,0 +1,2 @@
+from .python_telegram_bot_translator.adapter import PythonTelegramBotAdapter as PythonTelegramBotTranslator
+from .auto_translategram.translator_services import MtranslateTranslatorService

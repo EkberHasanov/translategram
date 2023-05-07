@@ -1,0 +1,5 @@
+mypy==1.2.0
+pytest==7.3.1
+pytest-asyncio==0.21.0
+build==0.10.0
+twine==4.0.2
