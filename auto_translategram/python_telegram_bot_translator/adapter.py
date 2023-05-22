@@ -1,9 +1,11 @@
 import inspect
-from typing import Any, Coroutine, Callable
+from typing import Any, Coroutine, Callable, Type, TypeVar
 from telegram.ext import ContextTypes
 from telegram import Update
 from ..auto_translategram.translator_services import TranslatorService
 from ..auto_translategram.translator import Translator
+
+_T = TypeVar('_T')
 
 
 class PythonTelegramBotAdapter(Translator):
@@ -16,7 +18,7 @@ class PythonTelegramBotAdapter(Translator):
     :param translator_service: The `TranslatorService` to use for translations.
     """
 
-    def __init__(self, translator_service: TranslatorService):
+    def __init__(self, translator_service: Type[TranslatorService]):
         """
         Initializes a new PythonTelegramBotAdapter instance using the specified `translator_service`.
 
@@ -26,7 +28,7 @@ class PythonTelegramBotAdapter(Translator):
 
     def handler_translator(
             self,
-            func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], None],
+            func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], _T],
             message: str) -> Callable[[Update, ContextTypes.DEFAULT_TYPE, str], Coroutine[Any, Any, Any]]:
         """
         A decorator that wraps a python-telegram-bot `handler` function to provide translation functionality.
@@ -50,7 +52,10 @@ class PythonTelegramBotAdapter(Translator):
                     source_language='en'
                     )
             is_async = inspect.iscoroutinefunction(func)
-            result = (await func(update, context, message)) if is_async else func(update, context, message)
+            if is_async:
+                result = await func(update, context, message)  # type: ignore[misc]
+            else:
+                result = func(update, context, message)
             return result
 
         return wrapper

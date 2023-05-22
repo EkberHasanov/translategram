@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Any, Callable, Coroutine, TypeVar
 from .translator_services import TranslatorService
+
+T = TypeVar('T')
 
 
 class Translator(ABC):
@@ -18,7 +20,7 @@ class Translator(ABC):
         ...
 
     @abstractmethod
-    def handler_translator(self, func: Callable[..., None], message: str) -> Callable[..., None]:
+    def handler_translator(self, func: Callable[..., None], message: str) -> Callable[..., Coroutine[Any, Any, Any]]:
         """
         Translate a message based on the users' language
         :param func: The handler function that is used for handling commands by Frameworks.

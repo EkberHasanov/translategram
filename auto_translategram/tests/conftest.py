@@ -4,7 +4,7 @@ import pytest
 from telegram import Update
 from telegram.ext import ContextTypes
 from ..auto_translategram.translator_services import TranslatorService, MtranslateTranslatorService
-from ..auto_translategram.service_libs import goslate, mtranslate
+from ..auto_translategram.service_libs import mtranslate
 from ..python_telegram_bot_translator.adapter import PythonTelegramBotAdapter
 
 
@@ -23,11 +23,6 @@ def mtranslate_service() -> TranslatorService:
 @pytest.fixture
 def mtranslate_object() -> TranslatorService:
     return MtranslateTranslatorService
-
-
-@pytest.fixture
-def goslate_lib() -> goslate:
-    return goslate
 
 
 @pytest.fixture

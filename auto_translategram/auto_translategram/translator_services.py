@@ -32,4 +32,4 @@ class MtranslateTranslatorService:
             to_language=target_language,
             from_language=source_language
             )
-        return translated_text
+        return str(translated_text)
