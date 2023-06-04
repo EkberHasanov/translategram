@@ -28,8 +28,8 @@ class PythonTelegramBotAdapter(Translator):
 
     def handler_translator(
             self,
-            func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], _T],
-            message: str) -> Callable[[Update, ContextTypes.DEFAULT_TYPE, str], Coroutine[Any, Any, Any]]:
+            message: str
+            ) -> Callable[[Callable[[Any, Any, str], _T]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]]:
         """
         A decorator that wraps a python-telegram-bot `handler` function to provide translation functionality.
 
@@ -41,21 +41,24 @@ class PythonTelegramBotAdapter(Translator):
         :param message: The message to translate.
         :return: A coroutine that wraps the handler function and provides translation functionality.
         """
+        def decorator(func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], _T]) \
+                -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:
 
-        async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str = message) -> Any:
-            user_lang = update.effective_user.language_code if update.effective_user else 'en'
-            message = message
-            if user_lang != 'en' and user_lang is not None:
-                message = await self._translator_service.translate_str(
-                    text=message,
-                    target_language=user_lang,
-                    source_language='en'
-                    )
-            is_async = inspect.iscoroutinefunction(func)
-            if is_async:
-                result = await func(update, context, message)  # type: ignore[misc]
-            else:
-                result = func(update, context, message)
-            return result
+            async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str = message) -> Any:
+                user_lang = update.effective_user.language_code if update.effective_user else 'en'
+                message = message
+                if user_lang != 'en' and user_lang is not None:
+                    message = await self._translator_service.translate_str(
+                        text=message,
+                        target_language=user_lang,
+                        source_language='en'
+                        )
+                is_async = inspect.iscoroutinefunction(func)
+                if is_async:
+                    result = await func(update, context, message)  # type: ignore[misc]
+                else:
+                    result = func(update, context, message)
+                return result
 
-        return wrapper
+            return wrapper
+        return decorator
