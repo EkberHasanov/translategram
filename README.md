@@ -14,6 +14,7 @@ pip install translategram
 
 ### First you need to add a parameter to your handler called whatever you want *(in this example we called it ```message```)* and its type should be the ```string```.
 ```python
+@translator.handler_translator(message="Welcome to out community!")
 async def login(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str) -> None:
     await context.bot.send_message(
             chat_id=update.effective_chat.id if update.effective_chat else 0,
@@ -21,9 +22,9 @@ async def login(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str
             )
 ```
 
-### And then you need to call ```handler_translator``` method when you register your handler in handler class.
+### And then just register your handler in handler class.
 ```python
-login_handler = CommandHandler('login', translator.handler_translator(login, message="Welcome to our community!"))
+login_handler = CommandHandler('login', login)
 ```
 
 ### As well as you should create translator instance based on the framework you are using *(in this case python-telegram-bot)*.
@@ -52,6 +53,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+@translator.handler_translator(message="Welcome to out community!")
 async def login(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str) -> None:
     await context.bot.send_message(
             chat_id=update.effective_chat.id if update.effective_chat else 0,
@@ -59,6 +61,7 @@ async def login(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str
             )
 
 
+@translator.handler_translator(message="This bot is very simple. You can just login with the /login command and that is it!")
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str) -> None:
     await context.bot.send_message(
             chat_id=update.effective_chat.id if update.effective_chat else 0,
@@ -68,8 +71,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str
 if __name__ == '__main__':
     application = ApplicationBuilder().token(TOKEN).build()
 
-    login_handler = CommandHandler('login', translator.handler_translator(login, message="Welcome to our community!"))
-    start_handler = CommandHandler('start', translator.handler_translator(start, message="This bot is very simple. You can just login with the /login command and that is it!"))
+    login_handler = CommandHandler('login', login)
+    start_handler = CommandHandler('start', start)
     application.add_handler(login_handler)
     application.add_handler(start_handler)
 
