@@ -18,7 +18,7 @@ class PythonTelegramBotAdapter(Translator):
     :param translator_service: The `TranslatorService` to use for translations.
     """
 
-    def __init__(self, translator_service: Type[TranslatorService]):
+    def __init__(self, translator_service: Type[TranslatorService]) -> None:
         """
         Initializes a new PythonTelegramBotAdapter instance using the specified `translator_service`.
 
