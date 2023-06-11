@@ -54,6 +54,7 @@ class PythonTelegramBotAdapter(Translator):
             async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str = message) -> Any:
                 user_lang = update.effective_user.language_code if update.effective_user else 'en'
                 message = message
+                msg = message
                 if user_lang != 'en' and user_lang is not None:  # TODO: get rid of this!
                     if self._cache_system is not None:
                         msg = await self._cache_system.retrieve(
