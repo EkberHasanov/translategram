@@ -1,5 +1,5 @@
 import pickle
-from typing import Protocol, TypeVar
+from typing import Protocol, TypeVar, Union
 
 T = TypeVar('T')
 
@@ -9,7 +9,7 @@ class Cache(Protocol):
     async def store(self, key: str, value: str) -> None:
         ...
 
-    async def retrieve(self, key: str) -> str | None:
+    async def retrieve(self, key: str) -> Union[str, None]:
         ...
 
 
@@ -25,7 +25,7 @@ class PickleCache:
         with open(self.pickle_file, 'wb') as file:
             pickle.dump(self._obj, file)
 
-    async def retrieve(self, key: str) -> str | None:
+    async def retrieve(self, key: str) -> Union[str, None]:
         with open(self.pickle_file, 'rb') as file:
             loaded_data = pickle.load(file)
         return loaded_data.__dict__.get(key) if isinstance(loaded_data.__dict__.get(key), str) else None
