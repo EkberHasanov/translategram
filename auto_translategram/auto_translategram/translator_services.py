@@ -1,5 +1,5 @@
 from typing import Protocol
-from .service_libs import mtranslate
+from auto_translategram.auto_translategram.service_libs import mtranslate
 
 
 class TranslatorService(Protocol):
