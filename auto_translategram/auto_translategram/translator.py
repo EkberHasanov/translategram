@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Coroutine, TypeVar
-from .translator_services import TranslatorService
+
+from auto_translategram.auto_translategram.cache import Cache
+from auto_translategram.auto_translategram.translator_services import TranslatorService
 
 T = TypeVar('T')
 
@@ -11,7 +13,7 @@ class Translator(ABC):
     This class provides a uniform interface for translation, allowing adapters to be written for different frameworks.
     This class is meant to be subclassed, and the `handler_translator` method should be implemented in the subclass.
     """
-    def __init__(self, translator_service: TranslatorService) -> None:
+    def __init__(self, translator_service: TranslatorService, cache_system: Cache | None = None) -> None:
         """
         Initializes a new Translator instance using the specified `translator_service`.
 
