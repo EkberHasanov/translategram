@@ -4,9 +4,9 @@ from telegram.ext import ContextTypes
 
 from telegram import Update
 
-from auto_translategram.auto_translategram.cache import Cache
-from auto_translategram.auto_translategram.translator_services import TranslatorService
-from auto_translategram.auto_translategram.translator import Translator
+from translategram.translategram.cache import Cache
+from translategram.translategram.translator_services import TranslatorService
+from translategram.translategram.translator import Translator
 
 _T = TypeVar('_T')
 

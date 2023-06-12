@@ -3,9 +3,9 @@ from unittest.mock import MagicMock
 import pytest
 from telegram import Update
 from telegram.ext import ContextTypes
-from auto_translategram.auto_translategram.translator_services import TranslatorService, MtranslateTranslatorService
-from auto_translategram.auto_translategram.service_libs import mtranslate
-from auto_translategram.python_telegram_bot_translator.adapter import PythonTelegramBotAdapter
+from translategram.translategram.translator_services import TranslatorService, MtranslateTranslatorService
+from translategram.translategram.service_libs import mtranslate
+from translategram.python_telegram_bot_translator.adapter import PythonTelegramBotAdapter
 
 
 @pytest.fixture

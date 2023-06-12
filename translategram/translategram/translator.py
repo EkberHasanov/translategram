@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Coroutine, Type, TypeVar, Union
 
-from auto_translategram.auto_translategram.cache import Cache
-from auto_translategram.auto_translategram.translator_services import TranslatorService
+from translategram.translategram.cache import Cache
+from translategram.translategram.translator_services import TranslatorService
 
 T = TypeVar('T')
 
