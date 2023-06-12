@@ -1,10 +1,10 @@
-# Auto Translategram
+# Translategram
 
-Auto Translategram is a Python package that provides translation capabilities for Telegram bots. It uses and supports multiple translation services.
+Translategram is a Python package that provides translation capabilities for Telegram bots. It uses and supports multiple translation services.
 
 ## Installation
 
-You can install Auto Translategram using pip:
+You can install Translategram using pip:
 
 ```
 pip install translategram
@@ -30,7 +30,7 @@ login_handler = CommandHandler('login', login)
 ### As well as you should create translator instance based on the framework you are using *(in this case python-telegram-bot)*.
 
 ```python
-from auto_translategram import PythonTelegramBotTranslator, MtranslateTranslatorService
+from translategram import PythonTelegramBotTranslator, MtranslateTranslatorService
 
 translator = PythonTelegramBotTranslator(MtranslateTranslatorService)
 ```
@@ -41,7 +41,7 @@ translator = PythonTelegramBotTranslator(MtranslateTranslatorService)
 import logging
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 from telegram import Update
-from auto_translategram import PythonTelegramBotTranslator, MtranslateTranslatorService
+from translategram import PythonTelegramBotTranslator, MtranslateTranslatorService
 
 translator = PythonTelegramBotTranslator(MtranslateTranslatorService)
 TOKEN = 'YOUR_TOKEN'
