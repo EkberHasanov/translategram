@@ -17,7 +17,8 @@ class Translator(ABC):
         """
         Initializes a new Translator instance using the specified `translator_service`.
 
-        :param translator_service: The `BaseTranslatorService` to use for translations.
+        :param translator_service: The `TranslatorService` to use for translations.
+        :param cache_system: The cache system to be used for caching translations. If None, caching is disabled.
         """
         ...
 

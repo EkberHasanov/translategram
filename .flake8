@@ -1,3 +1,3 @@
 [flake8]
 max-line-length = 119
-exclude = tests/, venv/, auto_translategram/__init__.py
+exclude = tests/, venv/, translategram/__init__.py
