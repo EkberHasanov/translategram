@@ -83,9 +83,6 @@ if __name__ == '__main__':
 ## TODO
 
 * Implement cache system
-    - Create abstract base class for different cache systems.
-    - Cache System with Pickling and serialization (e.g. JSON).
-        - The Pickle module in Python can be used to serialize dataclasses and store them on disk. This approach is simple and suitable for small to medium-sized projects.
     - Cache System with Memcache.
     - Cache System with Redis.
 * Add aiogram framework adapter.
