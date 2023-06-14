@@ -12,9 +12,9 @@ async def handler_translator_test(adapter, update, context, message):
 
 
 async def handler_translator_translation_test(adapter, update, context):
-    message = 'Hello World'
+    message = "Hello World"
     t_s_mock = adapter._translator_service
-    w = await t_s_mock.translate_str(message, 'fr')
+    w = await t_s_mock.translate_str(message, "fr")
 
     @adapter.handler_translator(message)
     async def func_test(update, context, message):

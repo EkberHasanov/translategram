@@ -1,15 +1,37 @@
 import asyncio
+from pathlib import Path
+from collections.abc import Generator
+import os
 from unittest.mock import MagicMock
 import pytest
 from telegram import Update
 from telegram.ext import ContextTypes
-from translategram.translategram.translator_services import TranslatorService, MtranslateTranslatorService
+from translategram.translategram.translator import Translator
+from translategram.translategram.translator_services import (
+    TranslatorService,
+    MtranslateTranslatorService,
+)
 from translategram.translategram.service_libs import mtranslate
-from translategram.python_telegram_bot_translator.adapter import PythonTelegramBotAdapter
+from translategram.python_telegram_bot_translator.adapter import (
+    PythonTelegramBotAdapter,
+)
+from translategram.translategram.cache import PickleCache
+
+
+class CacheData:
+    ...
 
 
 @pytest.fixture
-def event_loop():
+def cache(tmp_path: Path) -> Generator:
+    obj = CacheData()
+    cache: PickleCache = PickleCache(obj, filename=str(tmp_path / "translation.data"))
+    yield cache
+    os.remove(cache.pickle_file)
+
+
+@pytest.fixture
+def event_loop() -> Generator:
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
@@ -36,7 +58,7 @@ def mock_translator_service() -> MagicMock:
 
 
 @pytest.fixture
-def adapter(mtranslate_object):
+def adapter(mtranslate_object: TranslatorService) -> Translator:
     return PythonTelegramBotAdapter(mtranslate_object)
 
 
@@ -46,12 +68,12 @@ def adapter_with_mock(mock_translator_service):
 
 
 @pytest.fixture
-def update():
+def update() -> Update:
     return Update(None, None)
 
 
 @pytest.fixture
-def context():
+def context() -> ContextTypes.DEFAULT_TYPE:
     return ContextTypes.DEFAULT_TYPE
 
 
@@ -61,7 +83,8 @@ def message() -> str:
 
 
 @pytest.fixture
-def handler_func():
-    def handler(update, context, message):
+def handler_func() -> str:
+    def handler(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str):
         return message
+
     return handler
