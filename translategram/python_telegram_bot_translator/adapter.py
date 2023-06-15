@@ -8,7 +8,7 @@ from translategram.translategram.cache import Cache
 from translategram.translategram.translator_services import TranslatorService
 from translategram.translategram.translator import Translator
 
-_T = TypeVar('_T')
+_T = TypeVar("_T")
 
 
 class PythonTelegramBotAdapter(Translator):
@@ -19,10 +19,11 @@ class PythonTelegramBotAdapter(Translator):
     to provide translation functionality for the python-telegram-bot framework.
     """
 
-    def __init__(self,
-                 translator_service: Type[TranslatorService],
-                 cache_system: Union[Type[Cache], None] = None
-                 ) -> None:
+    def __init__(
+        self,
+        translator_service: Type[TranslatorService],
+        cache_system: Union[Type[Cache], None] = None,
+    ) -> None:
         """
         Initializes a new PythonTelegramBotAdapter instance using the specified `translator_service`.
 
@@ -33,9 +34,11 @@ class PythonTelegramBotAdapter(Translator):
         self._cache_system = cache_system
 
     def handler_translator(
-            self,
-            message: str
-            ) -> Callable[[Callable[[Any, Any, str], _T]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]]:
+        self, message: str
+    ) -> Callable[
+        [Callable[[Any, Any, str], _T]],
+        Callable[[Any, Any, str], Coroutine[Any, Any, Any]],
+    ]:
         """
         A decorator that wraps a python-telegram-bot `handler` function to provide translation functionality.
 
@@ -47,8 +50,10 @@ class PythonTelegramBotAdapter(Translator):
         :param message: The message to translate.
         :return: A coroutine that wraps the handler function and provides translation functionality.
         """
-        def decorator(func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], _T]) \
-                -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:
+
+        def decorator(
+            func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], _T]
+        ) -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:
             """
             Decorator function that provides translation functionality to a Python-telegram-bot `handler` function.
 
@@ -62,30 +67,40 @@ class PythonTelegramBotAdapter(Translator):
             :return: A coroutine that wraps the handler function and provides translation functionality.
             """
 
-            async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str = message) -> Any:
-                user_lang = update.effective_user.language_code if update.effective_user else 'en'
+            async def wrapper(
+                update: Update,
+                context: ContextTypes.DEFAULT_TYPE,
+                message: str = message,
+            ) -> Any:
+                user_lang = (
+                    update.effective_user.language_code
+                    if update.effective_user
+                    else "en"
+                )
                 message = message
                 msg = message
-                if user_lang != 'en' and user_lang is not None:  # TODO: get rid of this!
+                if (
+                    user_lang != "en" and user_lang is not None
+                ):  # TODO: get rid of this!
                     if self._cache_system is not None:
                         msg = await self._cache_system.retrieve(
-                            key=func.__name__ + '_' + user_lang
-                            )  # type: ignore
+                            key=func.__name__ + "_" + user_lang
+                        )  # type: ignore
                         if msg is None:
                             msg = await self._translator_service.translate_str(
                                 text=message,
                                 target_language=user_lang,
-                                source_language='en'
-                                )
+                                source_language="en",
+                            )
                             await self._cache_system.store(
-                                key=func.__name__ + '_' + user_lang, value=msg
-                                )  # type: ignore
+                                key=func.__name__ + "_" + user_lang, value=msg
+                            )  # type: ignore
                     else:
                         msg = await self._translator_service.translate_str(
                             text=message,
                             target_language=user_lang,
-                            source_language='en'
-                            )
+                            source_language="en",
+                        )
                 is_async = inspect.iscoroutinefunction(func)
                 if is_async:
                     result = await func(update, context, str(msg))  # type: ignore[misc]
@@ -94,4 +109,5 @@ class PythonTelegramBotAdapter(Translator):
                 return result
 
             return wrapper
+
         return decorator
