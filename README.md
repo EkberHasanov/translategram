@@ -14,7 +14,7 @@ pip install translategram
 
 ### First you need to add a parameter to your handler called whatever you want *(in this example we called it ```message```)* and its type should be the ```string```.
 ```python
-@translator.handler_translator(message="Welcome to out community!")
+@translator.handler_translator(message="Welcome to our community!")
 async def login(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str) -> None:
     await context.bot.send_message(
             chat_id=update.effective_chat.id if update.effective_chat else 0,
@@ -53,7 +53,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-@translator.handler_translator(message="Welcome to out community!")
+@translator.handler_translator(message="Welcome to our community!")
 async def login(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str) -> None:
     await context.bot.send_message(
             chat_id=update.effective_chat.id if update.effective_chat else 0,
