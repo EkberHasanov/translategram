@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Coroutine, Callable, Type, TypeVar, Union
+from typing import Any, Coroutine, Callable, Type, Union
 from telegram.ext import ContextTypes
 
 from telegram import Update
@@ -7,8 +7,6 @@ from telegram import Update
 from translategram.translategram.cache import Cache
 from translategram.translategram.translator_services import TranslatorService
 from translategram.translategram.translator import Translator
-
-_T = TypeVar("_T")
 
 
 class PythonTelegramBotAdapter(Translator):
@@ -34,9 +32,9 @@ class PythonTelegramBotAdapter(Translator):
         self._cache_system = cache_system
 
     def handler_translator(
-        self, message: str
+        self, message: str, source_lang: str = "auto"
     ) -> Callable[
-        [Callable[[Any, Any, str], _T]],
+        [Callable[[Any, Any, str], object]],
         Callable[[Any, Any, str], Coroutine[Any, Any, Any]],
     ]:
         """
@@ -44,26 +42,18 @@ class PythonTelegramBotAdapter(Translator):
 
         The decorated function will be executed after being wrapped with a new function that translates
         the incoming message into the user's preferred language (if it is not already in that language).
-        If the user does not have a preferred language set or if it is set to 'en', the message will not be translated.
 
-        :param func: The handler function that is used for handling commands by the Python-telegram-bot framework.
         :param message: The message to translate.
         :return: A coroutine that wraps the handler function and provides translation functionality.
         """
 
         def decorator(
-            func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], _T]
+            func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], object]
         ) -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:
             """
             Decorator function that provides translation functionality to a Python-telegram-bot `handler` function.
 
-            The decorated function will be executed after being wrapped with a new function that translates
-            the incoming message into the user's preferred language (if it is not already in that language).
-            If the user does not have a preferred language set or if it is set to 'en', the message will
-            not be translated. # TODO: please get rid of this!
-
             :param func: The handler function that is used for handling commands by the Python-telegram-bot framework.
-            :param message: The message to translate.
             :return: A coroutine that wraps the handler function and provides translation functionality.
             """
 
@@ -79,9 +69,7 @@ class PythonTelegramBotAdapter(Translator):
                 )
                 message = message
                 msg = message
-                if (
-                    user_lang != "en" and user_lang is not None
-                ):  # TODO: get rid of this!
+                if user_lang is not None:
                     if self._cache_system is not None:
                         msg = await self._cache_system.retrieve(
                             key=func.__name__ + "_" + user_lang
@@ -90,7 +78,7 @@ class PythonTelegramBotAdapter(Translator):
                             msg = await self._translator_service.translate_str(
                                 text=message,
                                 target_language=user_lang,
-                                source_language="en",
+                                source_language=source_lang,
                             )
                             await self._cache_system.store(
                                 key=func.__name__ + "_" + user_lang, value=msg
@@ -99,7 +87,7 @@ class PythonTelegramBotAdapter(Translator):
                         msg = await self._translator_service.translate_str(
                             text=message,
                             target_language=user_lang,
-                            source_language="en",
+                            source_language=source_lang,
                         )
                 is_async = inspect.iscoroutinefunction(func)
                 if is_async:
