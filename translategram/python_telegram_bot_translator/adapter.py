@@ -1,3 +1,4 @@
+from abc import abstractmethod
 import inspect
 from typing import Any, Coroutine, Callable, Type, Union
 from telegram.ext import ContextTypes
@@ -99,3 +100,18 @@ class PythonTelegramBotAdapter(Translator):
             return wrapper
 
         return decorator
+
+    def dynamic_handler_translator(
+        self, message_func: Callable[..., str], **params: dict
+    ) -> Callable[
+        [Callable[..., object]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]
+    ]:
+        def decorator(
+            func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], object]
+        ) -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:
+            async def wrapper(
+                update: Update,
+                context: ContextTypes.DEFAULT_TYPE,
+                message: str = message,
+            ):
+                ...
