@@ -31,6 +31,47 @@ class PythonTelegramBotAdapter(Translator):
         self._translator_service = translator_service()
         self._cache_system = cache_system
 
+    async def _get_translated_message(
+        self,
+        user_lang: str,
+        message: str,
+        func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], object],
+        source_lang: str,
+    ) -> str:
+        msg = message
+        if user_lang is not None:
+            if self._cache_system is not None:
+                msg = await self._cache_system.retrieve(
+                    key=func.__name__ + "_" + user_lang
+                )  # type: ignore
+                if msg is None:
+                    msg = await self._translator_service.translate_str(
+                        text=message,
+                        target_language=user_lang,
+                        source_language=source_lang,
+                    )
+                    await self._cache_system.store(
+                        key=func.__name__ + "_" + user_lang, value=msg
+                    )  # type: ignore
+            else:
+                msg = await self._translator_service.translate_str(
+                    text=message,
+                    target_language=user_lang,
+                    source_language=source_lang,
+                )
+        return msg
+
+    async def _return_handler_function(
+        self,
+        func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], object],
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
+        message: str,
+    ) -> Any:
+        if inspect.iscoroutinefunction(func):
+            return await func(update, context, message)
+        return func(update, context, message)
+
     def handler_translator(
         self, message: str, source_lang: str = "auto"
     ) -> Callable[
@@ -67,35 +108,38 @@ class PythonTelegramBotAdapter(Translator):
                     if update.effective_user
                     else "en"
                 )
-                message = message
-                msg = message
-                if user_lang is not None:
-                    if self._cache_system is not None:
-                        msg = await self._cache_system.retrieve(
-                            key=func.__name__ + "_" + user_lang
-                        )  # type: ignore
-                        if msg is None:
-                            msg = await self._translator_service.translate_str(
-                                text=message,
-                                target_language=user_lang,
-                                source_language=source_lang,
-                            )
-                            await self._cache_system.store(
-                                key=func.__name__ + "_" + user_lang, value=msg
-                            )  # type: ignore
-                    else:
-                        msg = await self._translator_service.translate_str(
-                            text=message,
-                            target_language=user_lang,
-                            source_language=source_lang,
-                        )
-                is_async = inspect.iscoroutinefunction(func)
-                if is_async:
-                    result = await func(update, context, str(msg))  # type: ignore[misc]
-                else:
-                    result = func(update, context, str(msg))  # type: ignore[misc]
-                return result
+                msg = await self._get_translated_message(
+                    user_lang=str(user_lang),
+                    message=message,
+                    func=func,
+                    source_lang=source_lang,
+                )
+                return await self._return_handler_function(
+                    func=func, update=update, context=context, message=msg
+                )
 
             return wrapper
 
         return decorator
+
+    def dynamic_handler_translator(
+        self, message_func: Callable[..., str], **params: dict
+    ) -> Callable[
+        [Callable[..., object]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]
+    ]:
+        ...
+
+    # def dynamic_handler_translator(
+    #     self, message_func: Callable[..., str], **params: dict
+    # ) -> Callable[
+    #     [Callable[..., object]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]
+    # ]:
+    #     def decorator(
+    #         func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], object]
+    #     ) -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:
+    #         async def wrapper(
+    #             update: Update,
+    #             context: ContextTypes.DEFAULT_TYPE,
+    #             message: str = message,
+    #         ) -> Any:
+    #             ...
