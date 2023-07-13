@@ -127,12 +127,19 @@ class PythonTelegramBotAdapter(Translator):
     ) -> Callable[
         [Callable[..., object]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]
     ]:
-        def decorator(
-            func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], object]
-        ) -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:
-            async def wrapper(
-                update: Update,
-                context: ContextTypes.DEFAULT_TYPE,
-                message: str = message,
-            ) -> Any:
-                ...
+        ...
+
+    # def dynamic_handler_translator(
+    #     self, message_func: Callable[..., str], **params: dict
+    # ) -> Callable[
+    #     [Callable[..., object]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]
+    # ]:
+    #     def decorator(
+    #         func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], object]
+    #     ) -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:
+    #         async def wrapper(
+    #             update: Update,
+    #             context: ContextTypes.DEFAULT_TYPE,
+    #             message: str = message,
+    #         ) -> Any:
+    #             ...
