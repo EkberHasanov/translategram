@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Coroutine, Callable, Type, Union
+from typing import Any, Coroutine, Callable, Dict, Type, Union
 from telegram.ext import ContextTypes
 
 from telegram import Update
@@ -72,6 +72,12 @@ class PythonTelegramBotAdapter(Translator):
             return await func(update, context, message)
         return func(update, context, message)
 
+    async def _get_user_language(self, update: Update) -> str:
+        user_lang = (
+            update.effective_user.language_code if update.effective_user else "en"
+        )
+        return str(user_lang)
+
     def handler_translator(
         self, message: str, source_lang: str = "auto"
     ) -> Callable[
@@ -103,19 +109,15 @@ class PythonTelegramBotAdapter(Translator):
                 context: ContextTypes.DEFAULT_TYPE,
                 message: str = message,
             ) -> Any:
-                user_lang = (
-                    update.effective_user.language_code
-                    if update.effective_user
-                    else "en"
-                )
-                msg = await self._get_translated_message(
+                user_lang = await self._get_user_language(update=update)
+                message = await self._get_translated_message(
                     user_lang=str(user_lang),
                     message=message,
                     func=func,
                     source_lang=source_lang,
                 )
                 return await self._return_handler_function(
-                    func=func, update=update, context=context, message=msg
+                    func=func, update=update, context=context, message=message
                 )
 
             return wrapper
@@ -123,23 +125,37 @@ class PythonTelegramBotAdapter(Translator):
         return decorator
 
     def dynamic_handler_translator(
-        self, message_func: Callable[..., str], **params: dict
+        self,
+        message_func: Callable[..., str],
+        params: Dict[str, str],
+        source_lang: str = "auto",
     ) -> Callable[
-        [Callable[..., object]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]
+        [Callable[..., object]], Callable[[Any, Any], Coroutine[Any, Any, Any]]
     ]:
-        ...
+        def decorator(
+            func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], object]
+        ) -> Callable[[Any, Any], Coroutine[Any, Any, Any]]:
+            async def wrapper(
+                update: Update,
+                context: ContextTypes.DEFAULT_TYPE,
+            ) -> Any:
+                text_inp = " ".join(context.args)  # type: ignore
+                message = (
+                    await message_func(text_inp, **params)
+                    if inspect.iscoroutinefunction(message_func)
+                    else message_func(text_inp, **params)
+                )
+                user_lang = await self._get_user_language(update=update)
+                message = await self._get_translated_message(
+                    user_lang=user_lang,
+                    message=message,
+                    func=func,
+                    source_lang=source_lang,
+                )
+                return await self._return_handler_function(
+                    func=func, update=update, context=context, message=message
+                )
 
-    # def dynamic_handler_translator(
-    #     self, message_func: Callable[..., str], **params: dict
-    # ) -> Callable[
-    #     [Callable[..., object]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]
-    # ]:
-    #     def decorator(
-    #         func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], object]
-    #     ) -> Callable[[Any, Any, str], Coroutine[Any, Any, Any]]:
-    #         async def wrapper(
-    #             update: Update,
-    #             context: ContextTypes.DEFAULT_TYPE,
-    #             message: str = message,
-    #         ) -> Any:
-    #             ...
+            return wrapper
+
+        return decorator
