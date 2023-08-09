@@ -1,9 +1,7 @@
 import inspect
-from typing import Any, Coroutine, Callable, Dict, Type, Union
+from typing import Any, Coroutine, Callable, Type, Union
 from telegram.ext import ContextTypes
-
 from telegram import Update
-
 from translategram.translategram.cache import Cache
 from translategram.translategram.translator_services import TranslatorService
 from translategram.translategram.translator import Translator
@@ -126,8 +124,7 @@ class PythonTelegramBotAdapter(Translator):
 
     def dynamic_handler_translator(
         self,
-        message_func: Callable[..., str],
-        params: Dict[str, str],
+        message_func: Callable[[str], str],
         source_lang: str = "auto",
     ) -> Callable[
         [Callable[..., object]], Callable[[Any, Any], Coroutine[Any, Any, Any]]
@@ -139,11 +136,11 @@ class PythonTelegramBotAdapter(Translator):
                 update: Update,
                 context: ContextTypes.DEFAULT_TYPE,
             ) -> Any:
-                text_inp = " ".join(context.args)  # type: ignore
+                user_inp = " ".join(context.args) if context.args else ""
                 message = (
-                    await message_func(text_inp, **params)
+                    await message_func(user_inp)
                     if inspect.iscoroutinefunction(message_func)
-                    else message_func(text_inp, **params)
+                    else message_func(user_inp)
                 )
                 user_lang = await self._get_user_language(update=update)
                 message = await self._get_translated_message(
