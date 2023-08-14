@@ -76,6 +76,24 @@ class PythonTelegramBotAdapter(Translator):
         )
         return str(user_lang)
 
+    async def _get_message_func_result(
+        self,
+        message_func: Callable[[str, Update], str],
+        user_inp: str,
+        update: Union[Update, None] = None,
+    ) -> str:
+        if update:
+            return str(
+                await message_func(user_inp, update)
+                if inspect.iscoroutinefunction(message_func)
+                else message_func(user_inp, update)
+            )
+        return str(
+            await message_func(user_inp)
+            if inspect.iscoroutinefunction(message_func)
+            else message_func(user_inp)
+        )
+
     def handler_translator(
         self, message: str, source_lang: str = "auto"
     ) -> Callable[
@@ -124,7 +142,7 @@ class PythonTelegramBotAdapter(Translator):
 
     def dynamic_handler_translator(
         self,
-        message_func: Callable[[str], str],
+        message_func: Callable[[str, Any], str],
         source_lang: str = "auto",
     ) -> Callable[
         [Callable[..., object]], Callable[[Any, Any], Coroutine[Any, Any, Any]]
@@ -137,11 +155,10 @@ class PythonTelegramBotAdapter(Translator):
                 context: ContextTypes.DEFAULT_TYPE,
             ) -> Any:
                 user_inp = " ".join(context.args) if context.args else ""
-                message = (
-                    await message_func(user_inp)
-                    if inspect.iscoroutinefunction(message_func)
-                    else message_func(user_inp)
-                )
+                args = [user_inp]
+                if type(update) in inspect.get_annotations(message_func).values():
+                    args.append(update)  # type: ignore
+                message = await self._get_message_func_result(message_func, *args)
                 user_lang = await self._get_user_language(update=update)
                 message = await self._get_translated_message(
                     user_lang=user_lang,
