@@ -89,9 +89,9 @@ class PythonTelegramBotAdapter(Translator):
                 else message_func(user_inp, update)
             )
         return str(
-            await message_func(user_inp)
+            await message_func(user_inp)  # type: ignore
             if inspect.iscoroutinefunction(message_func)
-            else message_func(user_inp)
+            else message_func(user_inp)  # type: ignore
         )
 
     def handler_translator(
@@ -158,7 +158,7 @@ class PythonTelegramBotAdapter(Translator):
                 args = [user_inp]
                 if type(update) in inspect.get_annotations(message_func).values():
                     args.append(update)  # type: ignore
-                message = await self._get_message_func_result(message_func, *args)
+                message = await self._get_message_func_result(message_func, *args)  # type: ignore
                 user_lang = await self._get_user_language(update=update)
                 message = await self._get_translated_message(
                     user_lang=user_lang,

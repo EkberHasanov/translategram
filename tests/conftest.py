@@ -2,6 +2,7 @@ import asyncio
 from pathlib import Path
 from collections.abc import Generator
 import os
+from typing import Any, Callable, Coroutine, Type
 from unittest.mock import MagicMock
 import pytest
 from telegram import Update
@@ -43,12 +44,12 @@ def mtranslate_service() -> TranslatorService:
 
 
 @pytest.fixture
-def mtranslate_object() -> TranslatorService:
+def mtranslate_object() -> Type[TranslatorService]:
     return MtranslateTranslatorService
 
 
 @pytest.fixture
-def mtranslate_lib() -> mtranslate:
+def mtranslate_lib() -> object:
     return mtranslate
 
 
@@ -58,7 +59,7 @@ def mock_translator_service() -> MagicMock:
 
 
 @pytest.fixture
-def adapter(mtranslate_object: TranslatorService) -> Translator:
+def adapter(mtranslate_object: Type[TranslatorService]) -> Translator:
     return PythonTelegramBotAdapter(mtranslate_object)
 
 
@@ -69,11 +70,11 @@ def adapter_with_mock(mock_translator_service):
 
 @pytest.fixture
 def update() -> Update:
-    return Update(None, None)
+    return Update(None, None)  # type: ignore
 
 
 @pytest.fixture
-def context() -> ContextTypes.DEFAULT_TYPE:
+def context() -> Type[ContextTypes.DEFAULT_TYPE]:
     return ContextTypes.DEFAULT_TYPE
 
 
@@ -83,8 +84,28 @@ def message() -> str:
 
 
 @pytest.fixture
-def handler_func() -> str:
+def handler_func() -> Callable:
     def handler(update: Update, context: ContextTypes.DEFAULT_TYPE, message: str):
         return message
 
     return handler
+
+
+@pytest.fixture
+def translate_function() -> Callable[[str], str]:
+    def tr_func(user_input: str) -> str:
+        if len(user_input) > 10:
+            return "Greater than 10"
+        return "Less than 10"
+
+    return tr_func
+
+
+@pytest.fixture
+def async_translate_function() -> Callable[[str], Coroutine[Any, Any, str]]:
+    async def tr_func(user_input: str) -> str:
+        if len(user_input) > 10:
+            return "Greater than 10"
+        return "Less than 10"
+
+    return tr_func
