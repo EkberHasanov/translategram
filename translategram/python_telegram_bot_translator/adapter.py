@@ -29,6 +29,36 @@ class PythonTelegramBotAdapter(Translator):
         self._translator_service = translator_service()
         self._cache_system = cache_system
 
+    async def _get_message_from_cache(
+        self,
+        func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], object],
+        user_lang: str,
+        message: str,
+        source_lang: str,
+    ) -> str:
+        """
+        Gets the message from the cache system.
+
+        :param func: The handler function that is used for handling commands by the Python-telegram-bot framework.
+        :param user_lang: The language to translate the message to.
+        :param message: The message to translate.
+        :param source_lang: The language to translate the message from.
+        :return: The message from the cache system.
+        """
+        msg = await self._cache_system.retrieve(
+            key=func.__name__ + "_" + user_lang
+        )  # type: ignore
+        if msg is None:
+            msg = await self._translator_service.translate_str(
+                text=message,
+                target_language=user_lang,
+                source_language=source_lang,
+            )
+            await self._cache_system.store(
+                key=func.__name__ + "_" + user_lang, value=msg
+            )  # type: ignore
+        return msg
+
     async def _get_translated_message(
         self,
         user_lang: str,
@@ -36,27 +66,20 @@ class PythonTelegramBotAdapter(Translator):
         func: Callable[[Update, ContextTypes.DEFAULT_TYPE, str], object],
         source_lang: str,
     ) -> str:
+        """
+        Gets the translated message for the specified `user_lang` and `message`.
+
+        :param user_lang: The language to translate the message to.
+        :param message: The message to translate.
+        :param func: The handler function that is used for handling commands by the Python-telegram-bot framework.
+        :param source_lang: The language to translate the message from.
+        :return: The translated message.
+        """
         msg = message
-        if user_lang is not None:
-            if self._cache_system is not None:
-                msg = await self._cache_system.retrieve(
-                    key=func.__name__ + "_" + user_lang
-                )  # type: ignore
-                if msg is None:
-                    msg = await self._translator_service.translate_str(
-                        text=message,
-                        target_language=user_lang,
-                        source_language=source_lang,
-                    )
-                    await self._cache_system.store(
-                        key=func.__name__ + "_" + user_lang, value=msg
-                    )  # type: ignore
-            else:
-                msg = await self._translator_service.translate_str(
-                    text=message,
-                    target_language=user_lang,
-                    source_language=source_lang,
-                )
+        if user_lang is not None and self._cache_system is not None:
+            msg = await self._get_message_from_cache(
+                func, user_lang, message, source_lang
+            )
         return msg
 
     async def _return_handler_function(
