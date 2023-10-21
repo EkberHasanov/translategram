@@ -56,7 +56,7 @@ class PythonTelegramBotAdapter(Translator):
             )
             await self._cache_system.store(
                 key=func.__name__ + "_" + user_lang, value=msg
-            )  if self._cache_system is not None else ""  # type: ignore
+            ) if self._cache_system is not None else ""  # type: ignore
         return msg
 
     async def _get_translated_message(
