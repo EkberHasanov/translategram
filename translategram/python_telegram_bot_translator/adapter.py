@@ -89,11 +89,26 @@ class PythonTelegramBotAdapter(Translator):
         context: ContextTypes.DEFAULT_TYPE,
         message: str,
     ) -> Any:
+        """
+        Returns the handler function.
+
+        :param func: The handler function that is used for handling commands by the Python-telegram-bot framework.
+        :param update: The update object.
+        :param context: The context object.
+        :param message: The message to translate.
+        :return: The handler function's result.
+        """
         if inspect.iscoroutinefunction(func):
             return await func(update, context, message)
         return func(update, context, message)
 
     async def _get_user_language(self, update: Update) -> str:
+        """
+        Gets the user's language.
+
+        :param update: The update object.
+        :return: The user's language.
+        """
         user_lang = (
             update.effective_user.language_code if update.effective_user else "en"
         )
