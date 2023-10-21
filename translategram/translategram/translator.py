@@ -29,13 +29,21 @@ class Translator(ABC):
 
     @abstractmethod
     def handler_translator(
-        self, message: str
+        self, message: str, source_lang: str
     ) -> Callable[
-        [Callable[..., T]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]
+        [Callable[..., object]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]
     ]:
         """
         Translate a message based on the users' language
         :param func: The handler function that is used for handling commands by Frameworks.
         :param message: The message to translate.
         """
+        ...
+
+    @abstractmethod
+    def dynamic_handler_translator(
+        self, message_func: Callable[[str, Any], str], source_lang: str = "auto"
+    ) -> Callable[
+        [Callable[..., object]], Callable[[Any, Any], Coroutine[Any, Any, Any]]
+    ]:
         ...
