@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="translategram",
-    version="0.3.0",
+    version="0.4.0",
     description="Translategram is a Python library for translating messages are sent by your Bot in Telegram",
     url="https://github.com/EkberHasanov/translategram",
     author="Akbar",
