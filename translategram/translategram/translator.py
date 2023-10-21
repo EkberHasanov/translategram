@@ -42,8 +42,8 @@ class Translator(ABC):
 
     @abstractmethod
     def dynamic_handler_translator(
-        self, message_func: Callable[..., str], **params: dict
+        self, message_func: Callable[[str, Any], str], source_lang: str = "auto"
     ) -> Callable[
-        [Callable[..., object]], Callable[[Any, Any, str], Coroutine[Any, Any, Any]]
+        [Callable[..., object]], Callable[[Any, Any], Coroutine[Any, Any, Any]]
     ]:
         ...
