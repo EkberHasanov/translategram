@@ -1,8 +1,6 @@
 import os
 import pickle
-from typing import Protocol, TypeVar, Union
-
-T = TypeVar("T")
+from typing import Protocol, Union
 
 
 class Cache(Protocol):
@@ -38,7 +36,7 @@ class PickleCache:
     This cache stores data in a pickle file on disk.
     """
 
-    def __init__(self, obj: T, filename: str = "translation.data") -> None:
+    def __init__(self, obj: object, filename: str = "translation.data") -> None:
         """
         Initialize the PickleCache.
 

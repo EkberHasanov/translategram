@@ -48,7 +48,7 @@ class PythonTelegramBotAdapter(Translator):
         msg = await self._cache_system.retrieve(
             key=func.__name__ + "_" + user_lang
             ) if self._cache_system is not None else ""  # type: ignore
-        if msg is None:
+        if msg is None or msg == "":
             msg = await self._translator_service.translate_str(
                 text=message,
                 target_language=user_lang,
@@ -76,7 +76,7 @@ class PythonTelegramBotAdapter(Translator):
         :return: The translated message.
         """
         msg = message
-        if user_lang is not None and self._cache_system is not None:
+        if self._cache_system is not None:
             msg = await self._get_message_from_cache(
                 func, user_lang, message, source_lang
             )
